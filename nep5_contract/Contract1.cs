@@ -80,9 +80,7 @@ namespace Nep5_Contract
 
             total_supply -= value;
             total_admin -= value;
-
-            total_supply += value;
-            Storage.Put(Storage.CurrentContext, admin, value);
+            Storage.Put(Storage.CurrentContext, admin, total_admin);
             Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
             return true;
         }
@@ -131,7 +129,7 @@ namespace Nep5_Contract
                     return Destory(admin, value);
                 }
             }
-            return true;
+            return false;
         }
 
     }
