@@ -29,6 +29,7 @@ namespace Nep5_Contract
             return "NEL";
         }
         private const ulong factor = 100000000;
+        private const ulong totalCoin = 100000000 * factor;
         public static byte Decimals()
         {
             return 8;
@@ -114,20 +115,32 @@ namespace Nep5_Contract
                     return Transfer(from, to, value);
                 }
                 //this is add
-                if (method == "deploy")
+                if (method == "deploy")//fix count
                 {
-                    if (args.Length != 2) return false;
+                    if (args.Length != 1) return false;
                     byte[] admin = (byte[])args[0];
-                    BigInteger value = (BigInteger)args[1];
-                    return Deploy(admin, value);
+                    if (!Runtime.CheckWitness(admin)) return false;
+                    byte[] total_supply = Storage.Get(Storage.CurrentContext, "totalSupply");
+                    if (total_supply.Length != 0) return false;
+
+                    Storage.Put(Storage.CurrentContext, admin, totalCoin);
+                    Storage.Put(Storage.CurrentContext, "totalSupply", totalCoin);
+                    Transferred(null, admin, totalCoin);
                 }
-                if (method == "destory")
-                {
-                    if (args.Length != 2) return false;
-                    byte[] admin = (byte[])args[0];
-                    BigInteger value = (BigInteger)args[1];
-                    return Destory(admin, value);
-                }
+                //if (method == "deploy")
+                //{
+                //    if (args.Length != 2) return false;
+                //    byte[] admin = (byte[])args[0];
+                //    BigInteger value = (BigInteger)args[1];
+                //    return Deploy(admin, value);
+                //}
+                //if (method == "destory")
+                //{
+                //    if (args.Length != 2) return false;
+                //    byte[] admin = (byte[])args[0];
+                //    BigInteger value = (BigInteger)args[1];
+                //    return Destory(admin, value);
+                //}
             }
             return false;
         }
