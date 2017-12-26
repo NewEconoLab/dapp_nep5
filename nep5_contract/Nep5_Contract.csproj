@@ -8,8 +8,8 @@
     <ProjectGuid>{CA318421-35AF-4E48-8D5F-EC096D57E1C5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WhoAmI_Contract</RootNamespace>
-    <AssemblyName>WhoAmI_Contract</AssemblyName>
+    <RootNamespace>Nep5_Contract</RootNamespace>
+    <AssemblyName>Nep5_Contract</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
