@@ -1,0 +1,9 @@
+D:\git\nel\neo-gui-nel\neo-gui\bin\Debug\plugins\plugin_whoami.dll
+D:\git\nel\neo-gui-nel\neo-gui\bin\Debug\plugins\plugin_whoami.pdb
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.WhoAmiEx.resources
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.WhoAmi.resources
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.csproj.GenerateResource.Cache
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.csproj.CoreCompileInputs.cache
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.dll
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.pdb
+D:\git\nel\dapp_whoami\plugin_whoami\obj\Debug\plugin_whoami.csprojResolveAssemblyReference.cache
