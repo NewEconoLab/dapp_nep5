@@ -8,6 +8,64 @@ namespace Nep5_Contract
 {
     public class ContractNep5 : SmartContract
     {
+        //nep5 notify
+        public delegate void deleTransfer(byte[] from, byte[] to, BigInteger value);
+        [DisplayName("transfer")]
+        public static event deleTransfer Transferred;
+
+        public static readonly byte[] SuperAdmin = Helper.ToScriptHash("ALjSnMZidJqd18iQaoCgFun6iqWRm2cVtj");
+
+        //nep5 func
+        public static BigInteger TotalSupply()
+        {
+            return Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+        }
+        public static string Name()
+        {
+            return "NEP5 Sample Coin";
+        }
+        public static string Symbol()
+        {
+            return "NEL";
+        }
+        private const ulong factor = 100000000;
+        public static byte Decimals()
+        {
+            return 8;
+        }
+        public static BigInteger BalanceOf(byte[] address)
+        {
+            return Storage.Get(Storage.CurrentContext, address).AsBigInteger();
+        }
+        public static bool Transfer(byte[] from, byte[] to, BigInteger value)
+        {
+            if (value <= 0) return false;
+            if (!Runtime.CheckWitness(from)) return false;
+            if (from == to) return true;
+            BigInteger from_value = Storage.Get(Storage.CurrentContext, from).AsBigInteger();
+            if (from_value < value) return false;
+            if (from_value == value)
+                Storage.Delete(Storage.CurrentContext, from);
+            else
+                Storage.Put(Storage.CurrentContext, from, from_value - value);
+            BigInteger to_value = Storage.Get(Storage.CurrentContext, to).AsBigInteger();
+            Storage.Put(Storage.CurrentContext, to, to_value + value);
+            Transferred(from, to, value);
+            return true;
+        }
+        //增发货币，仅限超级管理员
+        public static bool Deploy(byte[] admin, BigInteger value)
+        {
+            if (value <= 0) return false;
+            if (!Runtime.CheckWitness(admin)) return false;
+
+            BigInteger total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+            total_supply += value;
+            Storage.Put(Storage.CurrentContext, admin, value);
+            Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
+            return true;
+        }
+
         public static object Main(string method, object[] args)
         {
             var magicstr = "2017-12-26";
@@ -43,64 +101,12 @@ namespace Nep5_Contract
                     if (args.Length != 2) return false;
                     byte[] admin = (byte[])args[0];
                     BigInteger value = (BigInteger)args[1];
-                    return Deploy(admin,value);
+                    return Deploy(admin, value);
                 }
 
             }
             return true;
         }
-        public delegate void deleTransfer(byte[] from, byte[] to, BigInteger value);
-        [DisplayName("transfer")]
-        public static event deleTransfer Transferred;
-        public static readonly byte[] SuperAdmin = { 47, 60, 170, 33, 216, 40, 148, 2, 242, 150, 9, 84, 154, 50, 237, 160, 97, 90, 55, 183 };
-        private const ulong factor = 100000000;
-        public static BigInteger TotalSupply()
-        {
-            return Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
-        }
-        public static string Name()
-        {
-            return "NEP5 Sample Coin";
-        }
-        public static string Symbol()
-        {
-            return "NEL";
-        }
-        public static byte Decimals()
-        {
-            return 8;
-        }
-        public static BigInteger BalanceOf(byte[] address)
-        {
-            return Storage.Get(Storage.CurrentContext, address).AsBigInteger();
-        }
-        public static bool Transfer(byte[] from, byte[] to, BigInteger value)
-        {
-            if (value <= 0) return false;
-            if (!Runtime.CheckWitness(from)) return false;
-            if (from == to) return true;
-            BigInteger from_value = Storage.Get(Storage.CurrentContext, from).AsBigInteger();
-            if (from_value < value) return false;
-            if (from_value == value)
-                Storage.Delete(Storage.CurrentContext, from);
-            else
-                Storage.Put(Storage.CurrentContext, from, from_value - value);
-            BigInteger to_value = Storage.Get(Storage.CurrentContext, to).AsBigInteger();
-            Storage.Put(Storage.CurrentContext, to, to_value + value);
-            Transferred(from, to, value);
-            return true;
-        }
-        //增发
-        public static bool Deploy(byte[] admin, BigInteger value)
-        {
-            if (value <= 0) return false;
-            if (!Runtime.CheckWitness(admin)) return false;
 
-            BigInteger total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
-            total_supply += value;
-            Storage.Put(Storage.CurrentContext, admin, value);
-            Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
-            return true;
-        }
     }
 }

@@ -1,7 +1,0 @@
-D:\git\nel\dapp_nep5\nep5_contract\bin\Debug\WhoAmI_Contract.dll
-D:\git\nel\dapp_nep5\nep5_contract\bin\Debug\WhoAmI_Contract.pdb
-D:\git\nel\dapp_nep5\nep5_contract\obj\Debug\Nep5_Contract.csprojResolveAssemblyReference.cache
-D:\git\nel\dapp_nep5\nep5_contract\obj\Debug\Nep5_Contract.csproj.CoreCompileInputs.cache
-D:\git\nel\dapp_nep5\nep5_contract\obj\Debug\WhoAmI_Contract.dll
-D:\git\nel\dapp_nep5\nep5_contract\obj\Debug\WhoAmI_Contract.pdb
-D:\git\nel\dapp_nep5\nep5_contract\bin\Debug\Neo.SmartContract.Framework.dll

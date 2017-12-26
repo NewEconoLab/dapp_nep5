@@ -1,7 +1,0 @@
-D:\git\nel\dapp_whoami\WhoAmI_Contract\bin\Debug\WhoAmI_Contract.dll
-D:\git\nel\dapp_whoami\WhoAmI_Contract\bin\Debug\WhoAmI_Contract.pdb
-D:\git\nel\dapp_whoami\WhoAmI_Contract\obj\Debug\WhoAmI_Contract.csproj.CoreCompileInputs.cache
-D:\git\nel\dapp_whoami\WhoAmI_Contract\obj\Debug\WhoAmI_Contract.dll
-D:\git\nel\dapp_whoami\WhoAmI_Contract\obj\Debug\WhoAmI_Contract.pdb
-D:\git\nel\dapp_whoami\WhoAmI_Contract\bin\Debug\Neo.SmartContract.Framework.dll
-D:\git\nel\dapp_whoami\WhoAmI_Contract\obj\Debug\WhoAmI_Contract.csprojResolveAssemblyReference.cache
