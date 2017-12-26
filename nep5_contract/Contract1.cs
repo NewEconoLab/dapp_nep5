@@ -60,12 +60,32 @@ namespace Nep5_Contract
             if (!Runtime.CheckWitness(admin)) return false;
 
             BigInteger total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+            BigInteger total_admin = Storage.Get(Storage.CurrentContext, admin).AsBigInteger();
+            total_supply += value;
+            total_admin += value;
+            Storage.Put(Storage.CurrentContext, admin, total_admin);
+            Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
+            return true;
+        }
+        //销毁货币，仅限超级管理员
+        public static bool Destory(byte[] admin, BigInteger value)
+        {
+            if (value <= 0) return false;
+            if (!Runtime.CheckWitness(admin)) return false;
+
+            BigInteger total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+            BigInteger total_admin = Storage.Get(Storage.CurrentContext, admin).AsBigInteger();
+
+            if (value > total_admin) return false;
+
+            total_supply -= value;
+            total_admin -= value;
+
             total_supply += value;
             Storage.Put(Storage.CurrentContext, admin, value);
             Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
             return true;
         }
-
         public static object Main(string method, object[] args)
         {
             var magicstr = "2017-12-26";
@@ -103,7 +123,13 @@ namespace Nep5_Contract
                     BigInteger value = (BigInteger)args[1];
                     return Deploy(admin, value);
                 }
-
+                if (method == "destory")
+                {
+                    if (args.Length != 2) return false;
+                    byte[] admin = (byte[])args[0];
+                    BigInteger value = (BigInteger)args[1];
+                    return Destory(admin, value);
+                }
             }
             return true;
         }
