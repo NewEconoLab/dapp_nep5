@@ -118,14 +118,13 @@ namespace Nep5_Contract
                 if (method == "deploy")//fix count
                 {
                     if (args.Length != 1) return false;
-                    byte[] admin = (byte[])args[0];
-                    if (!Runtime.CheckWitness(admin)) return false;
+                    if (!Runtime.CheckWitness(SuperAdmin)) return false;
                     byte[] total_supply = Storage.Get(Storage.CurrentContext, "totalSupply");
                     if (total_supply.Length != 0) return false;
 
-                    Storage.Put(Storage.CurrentContext, admin, totalCoin);
+                    Storage.Put(Storage.CurrentContext, SuperAdmin, totalCoin);
                     Storage.Put(Storage.CurrentContext, "totalSupply", totalCoin);
-                    Transferred(null, admin, totalCoin);
+                    Transferred(null, SuperAdmin, totalCoin);
                 }
                 //if (method == "deploy")
                 //{

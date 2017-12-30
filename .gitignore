@@ -4,3 +4,5 @@
 /.vs
 /packages
 /plugin_nep5/packages
+/nep5_contract_hack/obj
+/nep5_contract_hack/bin
