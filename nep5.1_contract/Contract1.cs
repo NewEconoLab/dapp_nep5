@@ -8,7 +8,7 @@ namespace Nep5_Contract
 {
     public class ContractNep5_1 : SmartContract
     {
-        //一个完整的块天应该 4块每分钟*60*24=5769，但15秒出块只是个理论值，肯定会慢很多
+        //一个完整的块天应该 4块每分钟*60*24=5760，但15秒出块只是个理论值，肯定会慢很多
         public const ulong blockday = 4096;
         //取个整数吧，4096，
         public const ulong bonusInterval = blockday * 1;//发奖间隔
