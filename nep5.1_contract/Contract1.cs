@@ -46,7 +46,9 @@ namespace Nep5_Contract
         //checkpool*检查奖励
         //claim*领取奖励
 
-        //checkBonus,检查奖励，只读
+        //可循环分配资产
+        //最终确定加四个接口（暂定名Nep5.1）
+        //检查奖励，只读（everyone）
         public static object[] CheckBonus()
         {
             byte[] data = Storage.Get(Storage.CurrentContext, "!bonus:L");
@@ -84,8 +86,7 @@ namespace Nep5_Contract
             }
             return retarray;
         }
-
-        //消耗资产
+        //消耗资产（个人）
         public static bool Use(byte[] from, BigInteger value)
         {
             if (value <= 0) return false;
@@ -118,8 +119,7 @@ namespace Nep5_Contract
 
             return true;
         }
-
-        //检查奖励，如果需要就创建个新的
+        //新奖励，（everyone）随便调用，不符合规则就不会创建奖励，谁都可以调用这个，催促发奖励。
         public static BigInteger NewBonus()
         {
             byte[] data = Storage.Get(Storage.CurrentContext, "!bonus:L");
@@ -154,6 +154,7 @@ namespace Nep5_Contract
             Storage.Put(Storage.CurrentContext, "!bonus:L", bounsheight.AsByteArray());
             return bounsheight;
         }
+        //领取奖励（个人）
         public static BigInteger GetBonus(byte[] to)
         {
             byte[] data = Storage.Get(Storage.CurrentContext, "!bonus:L");
@@ -205,6 +206,7 @@ namespace Nep5_Contract
             }
             return 0;
         }
+
         //nep5 notify
         public delegate void deleTransfer(byte[] from, byte[] to, BigInteger value);
         [DisplayName("transfer")]
