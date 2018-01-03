@@ -9,10 +9,10 @@ namespace Nep5_Contract
     public class ContractNep5_1 : SmartContract
     {
         //一个完整的块天应该 4块每分钟*60*24=5769，但15秒出块只是个理论值，肯定会慢很多
-        public static readonly ulong blockday = 4096;
+        public const ulong blockday = 4096;
         //取个整数吧，4096，
-        public static readonly ulong bonusInterval = 4096 * 1;//发奖间隔
-        public static readonly int bonusCount = 7;
+        public const ulong bonusInterval = blockday * 1;//发奖间隔
+        public const int bonusCount = 7;
         //首先在nep5基础上将账户分为两个部分
         //一个部分是saving
         //saving 有一个产生块的标记
@@ -219,11 +219,11 @@ namespace Nep5_Contract
         }
         public static string Name()
         {
-            return "NEP5 Sample Coin";
+            return "NNS Coin";
         }
         public static string Symbol()
         {
-            return "NEL";
+            return "NNS";
         }
         private const ulong factor = 100000000;
         private const ulong totalCoin = 100000000 * factor;
@@ -336,6 +336,7 @@ namespace Nep5_Contract
                     return Transfer(from, to, value);
                 }
                 //this is add
+
                 if (method == "deploy")//fix count
                 {
                     if (args.Length != 1) return false;
@@ -343,7 +344,9 @@ namespace Nep5_Contract
                     byte[] total_supply = Storage.Get(Storage.CurrentContext, "totalSupply");
                     if (total_supply.Length != 0) return false;
 
-                    Storage.Put(Storage.CurrentContext, SuperAdmin, totalCoin);
+                    var indexcashto = SuperAdmin.Concat(new byte[] { 0 });
+
+                    Storage.Put(Storage.CurrentContext, indexcashto, totalCoin);
                     Storage.Put(Storage.CurrentContext, "totalSupply", totalCoin);
                     Transferred(null, SuperAdmin, totalCoin);
                 }
