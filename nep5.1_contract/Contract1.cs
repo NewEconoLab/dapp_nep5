@@ -9,7 +9,7 @@ namespace Nep5_Contract
     public class ContractNep5_1 : SmartContract
     {
         //一个完整的块天应该 4块每分钟*60*24=5760，但15秒出块只是个理论值，肯定会慢很多
-        public const ulong blockday = 4096;
+        public const ulong blockday = 2;//建议用4096 这里是为了测试
         //取个整数吧，4096，
         public const ulong bonusInterval = blockday * 1;//发奖间隔
         public const int bonusCount = 7;
@@ -59,7 +59,7 @@ namespace Nep5_Contract
 
 
             BigInteger lastBounsBlock = Helper.AsBigInteger(data);
-            object[] retarray = new object[5];
+            object[] retarray = new object[bonusCount];
 
             for (var i = 0; i < bonusCount; i++)
             {
@@ -140,6 +140,34 @@ namespace Nep5_Contract
             var poolv = Storage.Get(Storage.CurrentContext, "!pool").AsBigInteger();
             Storage.Delete(Storage.CurrentContext, "!pool");
             byte[] bIndex = Helper.AsByteArray("bonus").Concat(Helper.AsByteArray(bounsheight));
+
+            //找到第一个奖池
+            byte[] firstIndex = bIndex;
+            byte[] secondIndex = bIndex;
+            bool skipdel = false;
+            for (var i = 0; i < bonusCount; i++)
+            {
+                secondIndex = firstIndex;
+                byte[] _bLastIndex = firstIndex.Concat(Helper.AsByteArray(":L"));
+                var _index = Storage.Get(Storage.CurrentContext, _bLastIndex);//+1+2+3
+                if (_index.Length == 0)
+                {
+                    Runtime.Log("skipdel");
+                    skipdel = true;
+                    break;
+                }
+                firstIndex = Helper.AsByteArray("bonus").Concat(_index);
+            }
+            if(skipdel==false)//删除最后一个的连接，并把他的钱也放进新奖池里
+            {
+                byte[] secondLastIndex = secondIndex.Concat(Helper.AsByteArray(":L"));
+                Storage.Delete(Storage.CurrentContext, secondLastIndex);
+                byte[] firstBonusCount = firstIndex.Concat(Helper.AsByteArray(":C"));
+                var count = Storage.Get(Storage.CurrentContext, firstBonusCount).AsBigInteger();
+                poolv += count;
+            }
+
+
             byte[] bStartBlock = bIndex.Concat(Helper.AsByteArray(":S"));
             byte[] bBonusValue = bIndex.Concat(Helper.AsByteArray(":V"));
             byte[] bBonusCount = bIndex.Concat(Helper.AsByteArray(":C"));
@@ -152,6 +180,8 @@ namespace Nep5_Contract
 
             //写入lastblock
             Storage.Put(Storage.CurrentContext, "!bonus:L", bounsheight.AsByteArray());
+
+
             return bounsheight;
         }
         //领取奖励（个人）
@@ -184,7 +214,7 @@ namespace Nep5_Contract
                 {
                     var cangot = to_value_saving * BonusValue;//要领走多少
                     addValue += cangot;
-                    Storage.Put(Storage.CurrentContext, bBonusCount, bonusCount - cangot);
+                    Storage.Put(Storage.CurrentContext, bBonusCount, BonusCount - cangot);
                 }
                 byte[] LastIndex = Storage.Get(Storage.CurrentContext, bLastIndex);
                 if (LastIndex.Length == 0)
@@ -375,7 +405,7 @@ namespace Nep5_Contract
                 {
                     return CheckBonus();
                 }
-                if (method == "checkBonusAndNew")
+                if (method == "newBonus")
                 {
                     return NewBonus();
                 }
