@@ -187,6 +187,8 @@ namespace Nep5_Contract
         //领取奖励（个人）
         public static BigInteger GetBonus(byte[] to)
         {
+            if (!Runtime.CheckWitness(to)) return 0;
+
             byte[] data = Storage.Get(Storage.CurrentContext, "!bonus:L");
             if (data.Length == 0)
                 return 0;
