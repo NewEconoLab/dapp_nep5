@@ -17,7 +17,8 @@ namespace Nep5_Contract
         //    智能合约可以用此接口检查一笔NEP5转账的详情，只能查到已经发生过的交易
 
         //nep5.5gas 加入用gas兑换的部分，和退回gas的功能
-        //4.追加接口("exchangeNEP5",[])，自动将当前交易的输出中的GAS兑换为等量的该NEP5资产
+        //4.追加接口("mintTokens",[])，自动将当前交易的输出中的GAS兑换为等量的该NEP5资产
+        //逻辑和mintTokens是一样的，就保持一致吧
         //5.追加接口("exchangeUTXO",[who]),自动将当前交易输出中的gas，标记为who可提取，同时销毁who的等量NEP5资产
         //      之后可发起一笔转账 input为这个标记的utxo，output 为who，取走其中的GAS
 
@@ -308,7 +309,7 @@ namespace Nep5_Contract
                     byte[] txid = (byte[])args[0];
                     return GetTXInfo(txid);
                 }
-                if (method == "exchangeNEP5")
+                if (method == "mintTokens")
                 {
                     if (args.Length != 0) return 0;
                     return MintToken();
