@@ -67,7 +67,7 @@ namespace Nep5_Contract
             info.to = to;
             info.value = value;
             byte[] txinfo = Helper.Serialize(info);
-            var txid = ((Transaction)ExecutionEngine.ScriptContainer).Hash;
+            var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
             Storage.Put(Storage.CurrentContext, txid, txinfo);
             Transferred(from, to, value);
             return true;
@@ -83,7 +83,7 @@ namespace Nep5_Contract
             byte[] v = Storage.Get(Storage.CurrentContext, txid);
             if (v.Length == 0)
                 return null;
-            return (TransferInfo)Helper.Deserialize(v);
+            return Helper.Deserialize(v) as TransferInfo;
         }
         ////增发货币，仅限超级管理员
         //public static bool Deploy(byte[] admin, BigInteger value)
