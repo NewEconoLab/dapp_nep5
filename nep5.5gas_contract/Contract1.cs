@@ -17,7 +17,9 @@ namespace Nep5_Contract
         //    智能合约可以用此接口检查一笔NEP5转账的详情，只能查到已经发生过的交易
 
         //nep5.5gas 加入用gas兑换的部分，和退回gas的功能
-
+        //4.追加接口("exchangeNEP5",[])，自动将当前交易的输出中的GAS兑换为等量的该NEP5资产
+        //5.追加接口("exchangeUTXO",[who]),自动将当前交易输出中的gas，标记为who可提取，同时销毁who的等量NEP5资产
+        //      之后可发起一笔转账 input为这个标记的utxo，output 为who，取走其中的GAS
 
         //storage1 map<address:hash160,balancce:biginteger>     //nep5余额表
         //storage2 map<txid:hash256,balance:txinfo>             //nep5交易信息表
