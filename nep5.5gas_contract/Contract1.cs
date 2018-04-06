@@ -181,6 +181,11 @@ namespace Nep5_Contract
                 }
             }
 
+            //改变总量
+            var total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+            total_supply += value;
+            Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
+
             //1:1 不用换算
             return Transfer(null, who, value);
 
@@ -208,6 +213,11 @@ namespace Nep5_Contract
             byte[] target = Storage.Get(Storage.CurrentContext, coinid);
             if (target.Length > 0)
                 return false;
+
+            //改变总量
+            var total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
+            total_supply -= count;
+            Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
 
             return Transfer(who, null, count);
         }
