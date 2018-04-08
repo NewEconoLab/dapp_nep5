@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Nep5_Contract
 {
-    public class ContractNep55 : SmartContract
+    public class ContractNep55Gas : SmartContract
     {
         //在nep5标准上追加几个要求，暂定nep5.5标准
         //1.对接口("transfer",[from,to,value]) 检查 entry 和 callscript 一致性，禁止跳板
@@ -255,12 +255,21 @@ namespace Nep5_Contract
                 //走到这里没跳出，说明输入都没有被标记
 
                 //检查有没有钱离开本合约
+                //光这样还不够,还有可能撒钱
                 for (var i = 0; i < outputs.Length; i++)
                 {
                     if (outputs[i].ScriptHash.AsBigInteger() != curhash.AsBigInteger())
                     {
                         return false;
                     }
+                }
+                var refs = tx.GetReferences();
+                for(var i=0;i<refs.Length;i++)
+                {
+                    var asid = refs[i].AssetId;
+                    BigInteger bi = refs[i].Value;
+                    Runtime.Log(asid.AsString());
+                    Runtime.Log(bi.AsByteArray().AsString());
                 }
                 //没有资金离开本合约地址，允许
                 return true;

@@ -151,7 +151,6 @@ namespace Nep5_Contract
                     if (ExecutionEngine.EntryScriptHash.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
                         return false;
 
-                    return Transfer(from, to, value);
                 }
                 if (method == "transfer_app")
                 {
@@ -164,6 +163,7 @@ namespace Nep5_Contract
                     if (from.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
                         return false;
 
+                    return Transfer(from, to, value);
                 }
                 //this is add
                 if (method == "deploy")//fix count
