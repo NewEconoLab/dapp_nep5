@@ -80,64 +80,12 @@ namespace Nep5_Contract
                 Storage.Put(Storage.CurrentContext, to, to_value + value);
             }
             //记录交易信息
-            TransferInfo info = new TransferInfo();
-            info.from = from;
-            info.to = to;
-            info.value = value;
-            byte[] txinfo = Helper.Serialize(info);
-            var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
-            Storage.Put(Storage.CurrentContext, txid, txinfo);
-
+            SetTxInfo(from, to, value);
             //notify
             Transferred(from, to, value);
             return true;
         }
-        //public static bool Mint(byte[] to, BigInteger value)
-        //{
-        //    if (value <= 0) return false;
-
-        //    BigInteger to_value = Storage.Get(Storage.CurrentContext, to).AsBigInteger();
-        //    Storage.Put(Storage.CurrentContext, to, to_value + value);
-
-        //    //记录交易信息
-        //    TransferInfo info = new TransferInfo();
-        //    info.from = null;
-        //    info.to = to;
-        //    info.value = value;
-        //    byte[] txinfo = Helper.Serialize(info);
-        //    var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
-        //    Storage.Put(Storage.CurrentContext, txid, txinfo);
-
-        //    //notify
-        //    Transferred(null, to, value);
-        //    return true;
-        //}
-        //public static bool Refund(byte[] from, BigInteger value)
-        //{
-        //    if (value <= 0) return false;
-
-        //    //付款方
-        //    BigInteger from_value = Storage.Get(Storage.CurrentContext, from).AsBigInteger();
-        //    if (from_value < value) return false;
-        //    if (from_value == value)
-        //        Storage.Delete(Storage.CurrentContext, from);
-        //    else
-        //        Storage.Put(Storage.CurrentContext, from, from_value - value);
-
-
-        //    //记录交易信息
-        //    TransferInfo info = new TransferInfo();
-        //    info.from = from;
-        //    info.to = null;
-        //    info.value = value;
-        //    byte[] txinfo = Helper.Serialize(info);
-        //    var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
-        //    Storage.Put(Storage.CurrentContext, txid, txinfo);
-
-        //    //notify
-        //    Transferred(from, null, value);
-        //    return true;
-        //}
+     
         public class TransferInfo
         {
             public byte[] from;
@@ -146,12 +94,24 @@ namespace Nep5_Contract
         }
         public static TransferInfo GetTXInfo(byte[] txid)
         {
-            byte[] v = Storage.Get(Storage.CurrentContext, txid);
-            if (v.Length == 0)
-                return null;
-            return Helper.Deserialize(v) as TransferInfo;
+            //因为testnet 还在2.6，这些功能需要neo 2.7,在testnet上不可以开放
+            //byte[] v = Storage.Get(Storage.CurrentContext, txid);
+            //if (v.Length == 0)
+            //    return null;
+            //return Helper.Deserialize(v) as TransferInfo;
+            return null;
         }
-
+        public static void SetTxInfo(byte[] from,byte[] to,BigInteger value)
+        {
+            //因为testnet 还在2.6，这些功能需要neo 2.7,在testnet上不可以开放
+            //TransferInfo info = new TransferInfo();
+            //info.from = from;
+            //info.to = to;
+            //info.value = value;
+            //byte[] txinfo = Helper.Serialize(info);
+            //var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
+            //Storage.Put(Storage.CurrentContext, txid, txinfo);
+        }
         public static bool MintToken()
         {
             var tx = ExecutionEngine.ScriptContainer as Transaction;
