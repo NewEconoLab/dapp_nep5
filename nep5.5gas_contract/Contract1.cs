@@ -246,18 +246,21 @@ namespace Nep5_Contract
                 for (var i = 0; i < inputs.Length; i++)
                 {
                     byte[] coinid = inputs[i].PrevHash.Concat(new byte[] { 0, 0 });
-                    byte[] target = Storage.Get(Storage.CurrentContext, coinid);
-                    if (target.Length > 0)
+                    if (inputs[i].PrevIndex == 0)//如果utxo n为0 的话，是有可能是一个标记utxo的
                     {
-                        if (inputs.Length > 1 || outputs.Length != 1)//使用标记coin的时候只允许一个输入\一个输出
-                            return false;
+                        byte[] target = Storage.Get(Storage.CurrentContext, coinid);
+                        if (target.Length > 0)
+                        {
+                            if (inputs.Length > 1 || outputs.Length != 1)//使用标记coin的时候只允许一个输入\一个输出
+                                return false;
 
-                        //如果只有一个输入，一个输出，并且目的转账地址就是授权地址
-                        //允许转账
-                        if (outputs[0].ScriptHash.AsBigInteger() == target.AsBigInteger())
-                            return true;
-                        else//否则不允许
-                            return false;
+                            //如果只有一个输入，一个输出，并且目的转账地址就是授权地址
+                            //允许转账
+                            if (outputs[0].ScriptHash.AsBigInteger() == target.AsBigInteger())
+                                return true;
+                            else//否则不允许
+                                return false;
+                        }
                     }
                 }
                 //走到这里没跳出，说明输入都没有被标记
