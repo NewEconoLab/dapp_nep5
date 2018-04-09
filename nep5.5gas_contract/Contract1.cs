@@ -204,8 +204,7 @@ namespace Nep5_Contract
 
 
             //当前的交易已经名花有主了，不行
-            byte[] coinid = tx.Hash.Concat(new byte[] { 0, 0 });
-            byte[] target = Storage.Get(Storage.CurrentContext, coinid);
+            byte[] target = GetUTXOTarget(tx.Hash);
             if (target.Length > 0)
                 return false;
 
@@ -214,13 +213,22 @@ namespace Nep5_Contract
             bool b = Transfer(who, null, count);
             if (!b)
                 return false;
-            
+
+            //标记这个utxo归我所有
+            byte[] coinid = tx.Hash.Concat(new byte[] { 0, 0 });
+            Storage.Put(Storage.CurrentContext, coinid, who);
             //改变总量
             var total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
             total_supply -= count;
             Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
 
             return true;
+        }
+        public static byte[] GetUTXOTarget(byte[] txid)
+        {
+            byte[] coinid = txid.Concat(new byte[] { 0, 0 });
+            byte[] target = Storage.Get(Storage.CurrentContext, coinid);
+            return target;
         }
         public static object Main(string method, object[] args)
         {
@@ -346,6 +354,12 @@ namespace Nep5_Contract
                     if (!Runtime.CheckWitness(who))
                         return false;
                     return RefundToken(who);
+                }
+                if (method == "getUTXOTarget")
+                {
+                    if (args.Length != 1) return 0;
+                    byte[] hash = (byte[])args[0];
+                    return GetUTXOTarget(hash);
                 }
             }
             return false;
