@@ -195,12 +195,6 @@ namespace Nep5_Contract
         {
             var tx = ExecutionEngine.ScriptContainer as Transaction;
             var outputs = tx.GetOutputs();
-            if (outputs.Length > 1)
-                return false;
-
-            var count = outputs[0].Value;
-            //退款tx 肯定只有一个输出 并且转给本合约自身
-
             //退的不是gas，不行
             if (outputs[0].AssetId.AsBigInteger() != gas_asset_id.AsBigInteger())
                 return false;
@@ -208,22 +202,29 @@ namespace Nep5_Contract
             if (outputs[0].ScriptHash.AsBigInteger() != ExecutionEngine.ExecutingScriptHash.AsBigInteger())
                 return false;
 
+
             //当前的交易已经名花有主了，不行
             byte[] coinid = tx.Hash.Concat(new byte[] { 0, 0 });
             byte[] target = Storage.Get(Storage.CurrentContext, coinid);
             if (target.Length > 0)
                 return false;
 
+            //尝试销毁一定数量的金币
+            var count = outputs[0].Value;
+            bool b = Transfer(who, null, count);
+            if (!b)
+                return false;
+            
             //改变总量
             var total_supply = Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
             total_supply -= count;
             Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
 
-            return Transfer(who, null, count);
+            return true;
         }
         public static object Main(string method, object[] args)
         {
-            var magicstr = "2018-04-06";
+            var magicstr = "2018-04-09";
 
             if (Runtime.Trigger == TriggerType.Verification)//取钱才会涉及这里
             {
@@ -238,7 +239,6 @@ namespace Nep5_Contract
                 {
                     byte[] coinid = inputs[i].PrevHash.Concat(new byte[] { 0, 0 });
                     byte[] target = Storage.Get(Storage.CurrentContext, coinid);
-
                     if (target.Length > 0)
                     {
                         if (inputs.Length > 1 || outputs.Length != 1)//使用标记coin的时候只允许一个输入\一个输出
@@ -253,24 +253,30 @@ namespace Nep5_Contract
                     }
                 }
                 //走到这里没跳出，说明输入都没有被标记
+                var refs = tx.GetReferences();
+                BigInteger inputcount = 0;
+                for (var i = 0; i < refs.Length; i++)
+                {
+                    if (refs[i].AssetId.AsBigInteger() != gas_asset_id.AsBigInteger())
+                        return false;//不允许操作除gas以外的
 
+                    if (refs[i].ScriptHash.AsBigInteger() != curhash.AsBigInteger())
+                        return false;//不允许混入其它地址
+
+                    inputcount += refs[i].Value;
+                }
                 //检查有没有钱离开本合约
-                //光这样还不够,还有可能撒钱
+                BigInteger outputcount = 0;
                 for (var i = 0; i < outputs.Length; i++)
                 {
                     if (outputs[i].ScriptHash.AsBigInteger() != curhash.AsBigInteger())
                     {
                         return false;
                     }
+                    outputcount += outputs[i].Value;
                 }
-                var refs = tx.GetReferences();
-                for(var i=0;i<refs.Length;i++)
-                {
-                    var asid = refs[i].AssetId;
-                    BigInteger bi = refs[i].Value;
-                    Runtime.Log(asid.AsString());
-                    Runtime.Log(bi.AsByteArray().AsString());
-                }
+                if (outputcount != inputcount)
+                    return false;
                 //没有资金离开本合约地址，允许
                 return true;
             }
