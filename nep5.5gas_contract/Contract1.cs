@@ -80,7 +80,7 @@ namespace Nep5_Contract
                 Storage.Put(Storage.CurrentContext, to, to_value + value);
             }
             //记录交易信息
-            SetTxInfo(from, to, value);
+            setTxInfo(from, to, value);
             //notify
             Transferred(from, to, value);
             return true;
@@ -103,7 +103,7 @@ namespace Nep5_Contract
                 v = v.Concat(new byte[1] { 0x00 });
             return v;
         }
-        public static TransferInfo gettxinfo(byte[] txid)
+        public static TransferInfo getTXInfo(byte[] txid)
         {
             byte[] v = Storage.Get(Storage.CurrentContext, txid);
             if (v.Length == 0)
@@ -128,7 +128,7 @@ namespace Nep5_Contract
             //新式实现方法只要一行
             // return Helper.Deserialize(v) as TransferInfo;
         }
-        private static void SetTxInfo(byte[] from, byte[] to, BigInteger value)
+        private static void setTxInfo(byte[] from, byte[] to, BigInteger value)
         {
             //因为testnet 还在2.6，限制
 
@@ -335,11 +335,11 @@ namespace Nep5_Contract
 
                     return transfer(from, to, value);
                 }
-                if (method == "gettxinfo")
+                if (method == "getTXInfo")
                 {
                     if (args.Length != 1) return 0;
                     byte[] txid = (byte[])args[0];
-                    return gettxinfo(txid);
+                    return getTXInfo(txid);
                 }
                 if (method == "mintTokens")
                 {
