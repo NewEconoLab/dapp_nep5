@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nep5.5_Contract", "nep5.5_c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nep5.5gas_Contract", "nep5.5gas_contract\Nep5.5gas_Contract.csproj", "{9AB1F4DB-B744-4807-8051-72735359C749}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nft_Contract", "nft_contract\nft_Contract.csproj", "{08E92E53-74F8-4F23-A416-3572EB9D0323}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{9AB1F4DB-B744-4807-8051-72735359C749}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AB1F4DB-B744-4807-8051-72735359C749}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AB1F4DB-B744-4807-8051-72735359C749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08E92E53-74F8-4F23-A416-3572EB9D0323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08E92E53-74F8-4F23-A416-3572EB9D0323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08E92E53-74F8-4F23-A416-3572EB9D0323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08E92E53-74F8-4F23-A416-3572EB9D0323}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
