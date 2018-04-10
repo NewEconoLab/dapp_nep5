@@ -35,29 +35,29 @@ namespace Nep5_Contract
         //反序  e72d286979ee6cb1b7e65dfddfb2e384100b8d148e7758de42e4168b71792c60
         private static readonly byte[] gas_asset_id = Helper.HexToBytes("e72d286979ee6cb1b7e65dfddfb2e384100b8d148e7758de42e4168b71792c60");
         //nep5 func
-        public static BigInteger TotalSupply()
+        public static BigInteger totalSupply()
         {
             return Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
         }
-        public static string Name()
+        public static string name()
         {
             return "NEP5.5 Coin With GAS 1:1";
         }
-        public static string Symbol()
+        public static string symbol()
         {
             return "SGAS";
         }
         private const ulong factor = 100000000;
         private const ulong totalCoin = 100000000 * factor;
-        public static byte Decimals()
+        public static byte decimals()
         {
             return 8;
         }
-        public static BigInteger BalanceOf(byte[] address)
+        public static BigInteger balanceOf(byte[] address)
         {
             return Storage.Get(Storage.CurrentContext, address).AsBigInteger();
         }
-        public static bool Transfer(byte[] from, byte[] to, BigInteger value)
+        public static bool transfer(byte[] from, byte[] to, BigInteger value)
         {
             if (value <= 0) return false;
 
@@ -85,34 +85,70 @@ namespace Nep5_Contract
             Transferred(from, to, value);
             return true;
         }
-     
+
         public class TransferInfo
         {
             public byte[] from;
             public byte[] to;
             public BigInteger value;
         }
-        public static TransferInfo GetTXInfo(byte[] txid)
+        private static byte[] byteLen(BigInteger n)
         {
-            //因为testnet 还在2.6，这些功能需要neo 2.7,在testnet上不可以开放
-            //byte[] v = Storage.Get(Storage.CurrentContext, txid);
-            //if (v.Length == 0)
-            //    return null;
-            //return Helper.Deserialize(v) as TransferInfo;
-            return null;
+            byte[] v = n.AsByteArray();
+            if (v.Length > 2)
+                throw new Exception("not support");
+            if (v.Length < 2)
+                v = v.Concat(new byte[1] { 0x00 });
+            if (v.Length < 2)
+                v = v.Concat(new byte[1] { 0x00 });
+            return v;
         }
-        public static void SetTxInfo(byte[] from,byte[] to,BigInteger value)
+        public static TransferInfo gettxinfo(byte[] txid)
         {
-            //因为testnet 还在2.6，这些功能需要neo 2.7,在testnet上不可以开放
-            //TransferInfo info = new TransferInfo();
-            //info.from = from;
-            //info.to = to;
-            //info.value = value;
+            byte[] v = Storage.Get(Storage.CurrentContext, txid);
+            if (v.Length == 0)
+                return null;
+
+            //老式实现方法
+            TransferInfo info = new TransferInfo();
+            int seek = 0;
+            var fromlen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            seek+=2;
+            info.from = v.AsString().Substring(seek, fromlen).AsByteArray();
+            seek += fromlen;
+            var tolen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            seek += 2;
+            info.to = v.AsString().Substring(seek, tolen).AsByteArray();
+            seek += tolen;
+            var valuelen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            seek += 2;
+            info.value = v.AsString().Substring(seek, valuelen).AsByteArray().AsBigInteger();
+            return info;
+
+            //新式实现方法只要一行
+            // return Helper.Deserialize(v) as TransferInfo;
+        }
+        private static void SetTxInfo(byte[] from, byte[] to, BigInteger value)
+        {
+            //因为testnet 还在2.6，限制
+
+            TransferInfo info = new TransferInfo();
+            info.from = from;
+            info.to = to;
+            info.value = value;
+
+            //用一个老式实现法
+            byte[] txinfo = byteLen(info.from.Length).Concat(info.from);
+            txinfo = txinfo.Concat(byteLen(info.to.Length)).Concat(info.to);
+            byte[] _value = value.AsByteArray();
+            txinfo = txinfo.Concat(byteLen(_value.Length)).Concat(_value);
+            //新式实现方法只要一行
             //byte[] txinfo = Helper.Serialize(info);
-            //var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
-            //Storage.Put(Storage.CurrentContext, txid, txinfo);
+
+            var txid = (ExecutionEngine.ScriptContainer as Transaction).Hash;
+            Storage.Put(Storage.CurrentContext, txid, txinfo);
         }
-        public static bool MintToken()
+        public static bool mintTokens()
         {
             var tx = ExecutionEngine.ScriptContainer as Transaction;
 
@@ -147,11 +183,11 @@ namespace Nep5_Contract
             Storage.Put(Storage.CurrentContext, "totalSupply", total_supply);
 
             //1:1 不用换算
-            return Transfer(null, who, value);
+            return transfer(null, who, value);
 
         }
         //退款
-        public static bool RefundToken(byte[] who)
+        public static bool refund(byte[] who)
         {
             var tx = ExecutionEngine.ScriptContainer as Transaction;
             var outputs = tx.GetOutputs();
@@ -164,13 +200,13 @@ namespace Nep5_Contract
 
 
             //当前的交易已经名花有主了，不行
-            byte[] target = GetUTXOTarget(tx.Hash);
+            byte[] target = getRefundTarget(tx.Hash);
             if (target.Length > 0)
                 return false;
 
             //尝试销毁一定数量的金币
             var count = outputs[0].Value;
-            bool b = Transfer(who, null, count);
+            bool b = transfer(who, null, count);
             if (!b)
                 return false;
 
@@ -184,7 +220,7 @@ namespace Nep5_Contract
 
             return true;
         }
-        public static byte[] GetUTXOTarget(byte[] txid)
+        public static byte[] getRefundTarget(byte[] txid)
         {
             byte[] coinid = txid.Concat(new byte[] { 0, 0 });
             byte[] target = Storage.Get(Storage.CurrentContext, coinid);
@@ -192,7 +228,7 @@ namespace Nep5_Contract
         }
         public static object Main(string method, object[] args)
         {
-            var magicstr = "2018-04-09";
+            var magicstr = "2018-04-10";
 
             if (Runtime.Trigger == TriggerType.Verification)//取钱才会涉及这里
             {
@@ -254,15 +290,15 @@ namespace Nep5_Contract
             else if (Runtime.Trigger == TriggerType.Application)
             {
                 //this is in nep5
-                if (method == "totalSupply") return TotalSupply();
-                if (method == "name") return Name();
-                if (method == "symbol") return Symbol();
-                if (method == "decimals") return Decimals();
+                if (method == "totalSupply") return totalSupply();
+                if (method == "name") return name();
+                if (method == "symbol") return symbol();
+                if (method == "decimals") return decimals();
                 if (method == "balanceOf")
                 {
                     if (args.Length != 1) return 0;
                     byte[] account = (byte[])args[0];
-                    return BalanceOf(account);
+                    return balanceOf(account);
                 }
                 if (method == "transfer")
                 {
@@ -284,7 +320,7 @@ namespace Nep5_Contract
                     if (ExecutionEngine.EntryScriptHash.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
                         return false;
 
-                    return Transfer(from, to, value);
+                    return transfer(from, to, value);
                 }
                 if (method == "transfer_app")
                 {
@@ -297,32 +333,32 @@ namespace Nep5_Contract
                     if (from.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
                         return false;
 
-                    return Transfer(from, to, value);
+                    return transfer(from, to, value);
                 }
                 if (method == "gettxinfo")
                 {
                     if (args.Length != 1) return 0;
                     byte[] txid = (byte[])args[0];
-                    return GetTXInfo(txid);
+                    return gettxinfo(txid);
                 }
                 if (method == "mintTokens")
                 {
                     if (args.Length != 0) return 0;
-                    return MintToken();
+                    return mintTokens();
                 }
-                if (method == "exchangeUTXO")
+                if (method == "refund")
                 {
                     if (args.Length != 1) return 0;
                     byte[] who = (byte[])args[0];
                     if (!Runtime.CheckWitness(who))
                         return false;
-                    return RefundToken(who);
+                    return refund(who);
                 }
-                if (method == "getUTXOTarget")
+                if (method == "getRefundTarget")
                 {
                     if (args.Length != 1) return 0;
                     byte[] hash = (byte[])args[0];
-                    return GetUTXOTarget(hash);
+                    return getRefundTarget(hash);
                 }
             }
             return false;
