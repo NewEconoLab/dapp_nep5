@@ -77,17 +77,11 @@ namespace Nft_Contract
             //没有from签名，不让转
             if (!Runtime.CheckWitness(from))
                 return false;
-            //如果有跳板调用，不让转
-            if (ExecutionEngine.EntryScriptHash.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
-                return false;
 
             return _transfer(nftid, from, to);
         }
         public static bool transfer_app(byte[] nftid, byte[] from, byte[] to)
         {
-            //如果from 不是 传入脚本 不让转
-            if (from.AsBigInteger() != ExecutionEngine.CallingScriptHash.AsBigInteger())
-                return false;
 
             return _transfer(nftid, from, to);
         }
@@ -150,12 +144,19 @@ namespace Nft_Contract
             }
             else if (Runtime.Trigger == TriggerType.Application)
             {
+                //必须在入口函数取得callscript，调用脚本的函数，也会导致执行栈变化，再取callscript就晚了
+                var callscript = ExecutionEngine.CallingScriptHash;
+
                 //this is in nep5
                 if (method == "totalSupply") return totalSupply();
                 if (method == "name") return name();
                 if (method == "symbol") return symbol();
                 if (method == "transfer")
                 {
+                    //如果有跳板调用，不让转
+                    if (ExecutionEngine.EntryScriptHash.AsBigInteger() != callscript.AsBigInteger())
+                        return false;
+
                     if (args.Length != 3) return false;
                     byte[] nftid = (byte[])args[0];
                     byte[] from = (byte[])args[1];
@@ -179,6 +180,9 @@ namespace Nft_Contract
                     if (from.Length == 0 || to.Length == 0)
                         return false;
 
+                    //如果from 不是 传入脚本 不让转
+                    if (from.AsBigInteger() != callscript.AsBigInteger())
+                        return false;
 
                     return transfer_app(nftid, from, to);
                 }
