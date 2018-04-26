@@ -92,17 +92,18 @@ namespace Nep5_Contract
             public byte[] to;
             public BigInteger value;
         }
-        private static byte[] byteLen(BigInteger n)
-        {
-            byte[] v = n.AsByteArray();
-            if (v.Length > 2)
-                throw new Exception("not support");
-            if (v.Length < 2)
-                v = v.Concat(new byte[1] { 0x00 });
-            if (v.Length < 2)
-                v = v.Concat(new byte[1] { 0x00 });
-            return v;
-        }
+        //函数进栈损耗太大，不要这么实现了
+        //private static byte[] byteLen(BigInteger n)
+        //{
+        //    byte[] v = n.AsByteArray();
+        //    if (v.Length > 2)
+        //        throw new Exception("not support");
+        //    if (v.Length < 2)
+        //        v = v.Concat(new byte[1] { 0x00 });
+        //    if (v.Length < 2)
+        //        v = v.Concat(new byte[1] { 0x00 });
+        //    return v;
+        //}
         public static TransferInfo getTXInfo(byte[] txid)
         {
             byte[] v = Storage.Get(Storage.CurrentContext, txid);
@@ -112,17 +113,17 @@ namespace Nep5_Contract
             //老式实现方法
             TransferInfo info = new TransferInfo();
             int seek = 0;
-            var fromlen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            var fromlen = (int)v.Range(seek, 2).AsBigInteger();
             seek += 2;
-            info.from = v.AsString().Substring(seek, fromlen).AsByteArray();
+            info.from = v.Range(seek, fromlen);
             seek += fromlen;
-            var tolen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            var tolen = (int)v.Range(seek, 2).AsBigInteger();
             seek += 2;
-            info.to = v.AsString().Substring(seek, tolen).AsByteArray();
+            info.to = v.Range(seek, tolen);
             seek += tolen;
-            var valuelen = (int)v.AsString().Substring(seek, 2).AsByteArray().AsBigInteger();
+            var valuelen = (int)v.Range(seek, 2).AsBigInteger();
             seek += 2;
-            info.value = v.AsString().Substring(seek, valuelen).AsByteArray().AsBigInteger();
+            info.value = v.Range(seek, valuelen).AsBigInteger();
             return info;
 
             //新式实现方法只要一行
@@ -138,10 +139,23 @@ namespace Nep5_Contract
             info.value = value;
 
             //用一个老式实现法
-            byte[] txinfo = byteLen(info.from.Length).Concat(info.from);
-            txinfo = txinfo.Concat(byteLen(info.to.Length)).Concat(info.to);
-            byte[] _value = value.AsByteArray();
-            txinfo = txinfo.Concat(byteLen(_value.Length)).Concat(_value);
+            
+            //优化的拼包方法
+            var doublezero = new byte[] { 0, 0 };
+
+            var data = info.from;
+            var lendata = ((BigInteger)data.Length).AsByteArray().Concat(doublezero).Range(0, 2);
+            //lendata是数据长度得bytearray，因为bigint长度不固定，统一加两个零，然后只取前面两个字节
+            //为什么要两个字节，因为bigint是含有符号位得，统一加个零安全，要不然长度129取一个字节就是负数了
+            var txinfo = lendata.Concat(data);
+
+            data = info.to;
+            lendata = ((BigInteger)data.Length).AsByteArray().Concat(doublezero).Range(0, 2);
+            txinfo = txinfo.Concat(lendata).Concat(data);
+
+            data = value.AsByteArray();
+            lendata = ((BigInteger)data.Length).AsByteArray().Concat(doublezero).Range(0, 2);
+            txinfo = txinfo.Concat(lendata).Concat(data);
             //新式实现方法只要一行
             //byte[] txinfo = Helper.Serialize(info);
 
