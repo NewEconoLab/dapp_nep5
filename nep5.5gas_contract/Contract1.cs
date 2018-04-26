@@ -129,6 +129,8 @@ namespace Nep5_Contract
             //新式实现方法只要一行
             // return Helper.Deserialize(v) as TransferInfo;
         }
+        //把doublezero定义出来就好了，...... 要查编译器了
+        static readonly byte[] doublezero = new byte[2] { 0x00, 0x00 };
         private static void setTxInfo(byte[] from, byte[] to, BigInteger value)
         {
             //因为testnet 还在2.6，限制
@@ -139,9 +141,8 @@ namespace Nep5_Contract
             info.value = value;
 
             //用一个老式实现法
-            
+
             //优化的拼包方法
-            var doublezero = new byte[] { 0, 0 };
 
             var data = info.from;
             var lendata = ((BigInteger)data.Length).AsByteArray().Concat(doublezero).Range(0, 2);
